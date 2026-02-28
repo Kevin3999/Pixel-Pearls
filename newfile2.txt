@@ -1,1 +1,5 @@
+<<<<<<< HEAD
 This is another new file. hello
+=======
+This is another new file.HELLO THIS IS ADITYA
+>>>>>>> ec9da341fc27ecf8a556cc909a378c48af24cff8
