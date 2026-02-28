@@ -199,7 +199,7 @@ function updateUI(){
 setInterval(() => {
     buildings.forEach(b => {
         b.storage -= b.demand * 0.5; // decrease storage according to demand
-        if(b.storage < 0) b.storage = 0;
+        if(b.storage < 0){ b.storage = 0;alert("GAME END"); }
     });
     updateUI();
 }, 1000);
