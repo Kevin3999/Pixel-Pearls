@@ -4,90 +4,152 @@
 <meta charset="UTF-8">
 <title>Powerhouse Grid Game</title>
 <style>
+/* ===== BODY ===== */
 body {
     margin: 0;
     font-family: 'Segoe UI', sans-serif;
-    background: #1c1f2a;
-    color: white;
+    background: linear-gradient(to top, #0d1117 0%, #1c1f2a 100%);
+    color: #f0f0f0;
     text-align: center;
 }
+
+/* ===== HEADER ===== */
 h1 {
     margin: 20px 0;
+    font-size: 2.5em;
+    color: #22c55e;
+    text-shadow: 1px 1px 6px #000;
 }
+
+/* ===== GAME GRID ===== */
 #game-container {
     display: grid;
-    grid-template-columns: repeat(3, 1fr); 
-    grid-template-rows: repeat(2, auto);   
-    gap: 20px;
-    padding: 30px;
+    grid-template-columns: repeat(3, 1fr);
+    grid-template-rows: repeat(2, auto);
+    gap: 30px;
+    padding: 40px;
     justify-items: center;
 }
+
+/* ===== BUILDINGS ===== */
 .building {
-    background: rgba(255,255,255,0.05);
-    padding: 15px;
-    border-radius: 12px;
-    width: 150px;
+    background: linear-gradient(to top, #2a2f3a, #1c1f2a);
+    padding: 25px;
+    border-radius: 8px; /* sharper edges */
+    width: 200px;       /* larger card width */
+    height: 280px;      /* larger height */
     position: relative;
     cursor: pointer;
-    transition: transform 0.3s;
+    box-shadow: 0 6px 20px rgba(0,0,0,0.6);
+    transition: transform 0.3s, box-shadow 0.3s;
 }
 .building:hover {
-    transform: translateY(-5px);
+    transform: translateY(-8px);
+    box-shadow: 0 12px 35px rgba(0,0,0,0.8);
 }
 .building h3 {
-    margin: 10px 0;
-    font-size: 16px;
+    margin: 12px 0;
+    font-size: 20px;
+    color: #f0f0f0;
 }
+
+/* ===== BARS ===== */
 .bar-label {
-    font-size: 12px;
+    font-size: 13px;
     text-align: left;
-    margin-top: 8px;
-    opacity: 0.8;
+    margin-top: 10px;
+    opacity: 0.9;
 }
+
 .bar-container {
-    height: 12px;
+    height: 16px;  /* taller bars */
     width: 100%;
-    background: #334155;
-    border-radius: 10px;
+    background: #3a3f50;
+    border-radius: 12px;
     overflow: hidden;
-    margin-top: 4px;
+    margin-top: 5px;
 }
+
 .storage-level {
     height: 100%;
-    background: #22c55e;
+    background: linear-gradient(90deg, #22c55e, #16a34a);
     width: 100%;
     transition: width 0.4s;
+    border-radius: 12px;
 }
+
 .demand-level {
     height: 100%;
-    background: #f97316;
+    background: linear-gradient(90deg, #f97316, #ea580c);
     width: 60%;
     transition: width 0.4s;
+    border-radius: 12px;
 }
+
+/* ===== WARNING ===== */
 .warning {
     position: absolute;
-    top: 8px;
-    right: 8px;
-    background: #facc15;
-    color: black;
-    padding: 3px 6px;
-    border-radius: 10px;
-    font-size: 11px;
+    top: 12px;
+    right: 12px;
+    background: #f87171;
+    color: white;
+    padding: 5px 10px;
+    border-radius: 12px;
+    font-size: 12px;
     display: none;
+    font-weight: bold;
+    animation: pulse 1s infinite;
 }
+
+@keyframes pulse {
+    0%, 100% { opacity: 1; transform: scale(1);}
+    50% { opacity: 0.7; transform: scale(1.1);}
+}
+
+/* ===== SMOKE ===== */
 .smoke {
-    width: 10px;
-    height: 10px;
+    width: 14px;
+    height: 14px;
     background: rgba(200,200,200,0.7);
     border-radius: 50%;
     position: absolute;
-    top: -20px;
+    top: -30px;
     left: 50%;
     transform: translateX(-50%);
     display: none;
+    animation: rise 2s linear infinite;
 }
+@keyframes rise {
+    0% { transform: translate(-50%,0); opacity: 0.8;}
+    100% { transform: translate(-50%,-50px); opacity: 0;}
+}
+
+/* ===== SELECTED BUILDING ===== */
 .selected {
-    box-shadow: 0 0 15px 3px #facc15;
+    box-shadow: 0 0 25px 5px #facc15;
+    border: 3px solid #facc15;
+    transition: all 0.3s;
+}
+
+/* ===== SLIDER ===== */
+input[type=range] {
+    -webkit-appearance: none;
+    width: 100%;
+    margin-top: 8px;
+}
+input[type=range]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    height: 16px;
+    width: 16px;
+    background: #22c55e;
+    border-radius: 50%;
+    cursor: pointer;
+    border: 2px solid #16a34a;
+}
+input[type=range]::-webkit-slider-runnable-track {
+    height: 8px;
+    background: #3a3f50;
+    border-radius: 4px;
 }
 </style>
 </head>
@@ -98,6 +160,7 @@ h1 {
 <div id="game-container"></div>
 
 <script>
+// ===== BUILDING DATA =====
 const BUILDINGS = [
     {name:"Power Plant", storage:100, demand:1.5},
     {name:"Industry", storage:100, demand:1.3},
@@ -112,9 +175,11 @@ const TRANSFER_PERCENTAGE = 0.3;
 
 let buildings = [];
 let selectedBuilding = null;
+let gameInterval = null;
 
 const container = document.getElementById("game-container");
 
+// ===== CREATE BUILDINGS =====
 BUILDINGS.forEach((b, i) => {
     let building = {
         id: i,
@@ -135,7 +200,7 @@ BUILDINGS.forEach((b, i) => {
         <div class="bar-container"><div class="storage-level"></div></div>
         <div class="bar-label">Demand</div>
         <div class="bar-container"><div class="demand-level"></div></div>
-        <input type="range" min="0" max="${MAX_DEMAND}" step="0.1" value="${b.demand}" style="width:100%; margin-top:5px;">
+        <input type="range" min="0" max="${MAX_DEMAND}" step="0.1" value="${b.demand}">
     `;
     container.appendChild(div);
 
@@ -148,10 +213,10 @@ BUILDINGS.forEach((b, i) => {
 
     building.element = div;
     building.demandInput = demandInput;
-
     buildings.push(building);
 });
 
+// ===== SELECT AND TRANSFER POWER =====
 function selectBuilding(building){
     if(selectedBuilding === null){
         selectedBuilding = building;
@@ -169,6 +234,7 @@ function selectBuilding(building){
     }
 }
 
+// ===== UPDATE UI =====
 function updateUI(){
     buildings.forEach(b => {
         const storageBar = b.element.querySelector(".storage-level");
@@ -190,16 +256,27 @@ function updateUI(){
     });
 }
 
-setInterval(() => {
+// ===== GAME LOOP =====
+gameInterval = setInterval(() => {
+    let gameOver = false;
+
     buildings.forEach(b => {
         b.storage -= b.demand * 0.5;
-        if(b.storage < 0){ b.storage = 0;alert("GAME END"); }
+        if(b.storage <= 0){
+            b.storage = 0;
+            gameOver = true;
+        }
     });
+
     updateUI();
+
+    if(gameOver){
+        alert("GAME OVER! A building ran out of power.");
+        clearInterval(gameInterval);
+    }
 }, 1000);
 
 updateUI();
-
 </script>
 </body>
 </html>
