@@ -2,84 +2,201 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title>Powerhouse Survival Game</title>
+<title>⚡ Powerhouse Survival</title>
 
 <style>
 body{
     margin:0;
-    background:#141821;
-    font-family:Arial, sans-serif;
+    background:linear-gradient(to bottom, #0f172a, #1e293b);
+    font-family:'Segoe UI', sans-serif;
     color:white;
     text-align:center;
 }
 
 h1{
     margin-top:20px;
+    font-weight:600;
+}
+
+#timer{
+    font-size:18px;
+    margin:15px 0;
+    padding:8px 18px;
+    background:rgba(255,255,255,0.08);
+    border-radius:20px;
+    display:inline-block;
 }
 
 .game{
     display:grid;
-    grid-template-columns:repeat(3, 1fr);
+    grid-template-columns:repeat(auto-fit,minmax(230px,1fr));
     gap:30px;
-    padding:30px;
+    padding:40px;
 }
 
 .plant{
-    background:#232a3a;
-    padding:20px;
-    border-radius:15px;
+    background:rgba(255,255,255,0.05);
+    padding:25px;
+    border-radius:20px;
+    backdrop-filter:blur(10px);
+    box-shadow:0 10px 25px rgba(0,0,0,0.4);
+    position:relative;
+    transition:0.3s;
+}
+
+.plant:hover{
+    transform:translateY(-5px);
+}
+
+/* HOUSE */
+.house-wrapper{
+    position:relative;
+    width:120px;
+    margin:0 auto 15px auto;
+}
+
+.roof{
+    width:0;
+    height:0;
+    border-left:70px solid transparent;
+    border-right:70px solid transparent;
+    border-bottom:60px solid #b91c1c;
+    margin:0 auto;
     position:relative;
 }
 
-.storage-bar{
-    height:20px;
+.chimney{
+    width:20px;
+    height:40px;
     background:#444;
-    border-radius:10px;
-    overflow:hidden;
+    position:absolute;
+    top:-40px;
+    right:25px;
+    border-radius:3px;
+}
+
+.house{
+    width:120px;
+    height:90px;
+    background:linear-gradient(to bottom,#3b82f6,#1e40af);
+    border-radius:8px;
+    position:relative;
+}
+
+.door{
+    width:30px;
+    height:45px;
+    background:#78350f;
+    position:absolute;
+    bottom:0;
+    left:45px;
+    border-radius:5px 5px 0 0;
+}
+
+.window{
+    width:25px;
+    height:25px;
+    background:#facc15;
+    position:absolute;
+    top:25px;
+    border-radius:4px;
+    box-shadow:0 0 10px rgba(255,255,150,0.7);
+}
+
+.window.left{ left:15px; }
+.window.right{ right:15px; }
+
+/* Smoke */
+.smoke{
+    width:15px;
+    height:15px;
+    background:rgba(220,220,220,0.7);
+    border-radius:50%;
+    position:absolute;
+    top:-60px;
+    right:30px;
+    animation:smokeRise 3s linear infinite;
+    display:none;
+}
+
+@keyframes smokeRise{
+    0%{transform:translateY(0) scale(1);opacity:0.8;}
+    100%{transform:translateY(-50px) scale(1.5);opacity:0;}
+}
+
+/* Warning */
+.warning{
+    position:absolute;
+    top:15px;
+    right:15px;
+    background:#facc15;
+    color:black;
+    padding:5px 8px;
+    border-radius:15px;
+    font-size:12px;
+    font-weight:bold;
+    display:none;
+    animation:pulse 1s infinite;
+}
+
+@keyframes pulse{
+    0%{transform:scale(1);}
+    50%{transform:scale(1.1);}
+    100%{transform:scale(1);}
+}
+
+/* Bars */
+.bar-label{
+    font-size:12px;
     margin-top:10px;
+    text-align:left;
+    opacity:0.8;
+}
+
+.storage-bar,
+.demand-bar{
+    height:12px;
+    border-radius:20px;
+    overflow:hidden;
+    margin-top:6px;
+    background:#334155;
 }
 
 .storage-level{
     height:100%;
-    background:linear-gradient(to right, #00ff88, #00ccff);
-    transition:width 0.3s;
+    background:linear-gradient(to right,#22c55e,#06b6d4);
+    transition:width 0.4s ease;
 }
 
-.smoke{
-    width:20px;
-    height:20px;
-    background:rgba(200,200,200,0.7);
-    border-radius:50%;
-    margin:10px auto;
-    animation:smokeRise 3s linear infinite;
-}
-
-@keyframes smokeRise{
-    0%{transform:translateY(0);opacity:0.8;}
-    100%{transform:translateY(-40px);opacity:0;}
+.demand-level{
+    height:100%;
+    background:linear-gradient(to right,#f97316,#ef4444);
+    transition:width 0.4s ease;
 }
 
 button{
-    margin-top:10px;
-    padding:5px 10px;
+    margin-top:15px;
+    padding:8px 14px;
     border:none;
-    border-radius:5px;
+    border-radius:8px;
     cursor:pointer;
-    background:#008cff;
+    background:linear-gradient(to right,#3b82f6,#06b6d4);
     color:white;
+    transition:0.3s;
 }
 
 button:hover{
-    background:#00aaff;
+    transform:scale(1.05);
 }
 
-.dead{
-    background:#8b0000 !important;
+/* Dead state */
+.dead .house{
+    background:linear-gradient(to bottom,#7f1d1d,#450a0a);
 }
 
-#timer{
-    font-size:20px;
-    margin-top:10px;
+.dead .window{
+    background:#111;
+    box-shadow:none;
 }
 </style>
 </head>
@@ -87,15 +204,14 @@ button:hover{
 <body>
 
 <h1>⚡ Powerhouse Survival ⚡</h1>
-<p>Connect plants to share fuel and survive as long as possible!</p>
 <div id="timer">Time Survived: 0s</div>
-
 <div class="game" id="game"></div>
 
 <script>
 
 const NUM_PLANTS = 6;
 const FIXED_DEMAND = [1.2, 1.0, 1.5, 0.9, 1.3, 1.1];
+const MAX_DEMAND = 2;
 
 let plants = [];
 let connections = [];
@@ -105,22 +221,42 @@ let gameOver = false;
 const gameDiv = document.getElementById("game");
 
 for(let i=0;i<NUM_PLANTS;i++){
-    let plant = {
-        id:i,
-        storage:100,
-        element:null
-    };
+
+    let plant = { id:i, storage:100, element:null };
 
     let div = document.createElement("div");
     div.className="plant";
+
     div.innerHTML=`
         <h3>Zone ${i+1}</h3>
-        <div class="smoke" id="smoke${i}"></div>
-        <p>Demand: ${FIXED_DEMAND[i]}</p>
+
+        <div class="house-wrapper">
+            <div class="roof">
+                <div class="chimney"></div>
+            </div>
+            <div class="house">
+                <div class="door"></div>
+                <div class="window left"></div>
+                <div class="window right"></div>
+            </div>
+            <div class="smoke" id="smoke${i}"></div>
+        </div>
+
+        <div class="warning" id="warning${i}">LOW FUEL</div>
+
+        <div class="bar-label">Storage</div>
         <div class="storage-bar">
             <div class="storage-level" id="storage${i}"></div>
         </div>
-        <button onclick="toggleConnection(${i})">Toggle Connect</button>
+
+        <div class="bar-label">Demand</div>
+        <div class="demand-bar">
+            <div class="demand-level" id="demand${i}"></div>
+        </div>
+
+        <button onclick="toggleConnection(${i})">
+            Toggle Connect
+        </button>
     `;
 
     plant.element = div;
@@ -129,42 +265,59 @@ for(let i=0;i<NUM_PLANTS;i++){
 }
 
 function updateUI(){
-    plants.forEach((p,i)=>{
-        let percent = p.storage;
-        if(percent < 0) percent = 0;
 
-        document.getElementById("storage"+i).style.width = percent+"%";
+    plants.forEach((p,i)=>{
+
+        let storagePercent = Math.max(p.storage,0);
+        document.getElementById("storage"+i).style.width = storagePercent+"%";
+
+        let demandPercent = (FIXED_DEMAND[i]/MAX_DEMAND)*100;
+        document.getElementById("demand"+i).style.width = demandPercent+"%";
 
         let smoke = document.getElementById("smoke"+i);
-        smoke.style.animationDuration = (4 - FIXED_DEMAND[i]) + "s";
+        let warning = document.getElementById("warning"+i);
+        let storageBar = document.getElementById("storage"+i);
+
+        if(p.storage < 30){
+            warning.style.display="block";
+            smoke.style.display="block";
+        } else {
+            warning.style.display="none";
+            smoke.style.display="none";
+        }
+
+        if(storagePercent < demandPercent){
+            storageBar.style.background="linear-gradient(to right,#ef4444,#dc2626)";
+        } else {
+            storageBar.style.background="linear-gradient(to right,#22c55e,#06b6d4)";
+        }
 
         if(p.storage <= 0){
             p.element.classList.add("dead");
         }
     });
+
+    document.getElementById("timer").innerText="Time Survived: "+time+"s";
 }
 
 function equalize(){
-    if(connections.length < 2) return;
+    if(connections.length<2) return;
 
-    let total = 0;
-    connections.forEach(i=> total += plants[i].storage);
-    let avg = total / connections.length;
+    let total=0;
+    connections.forEach(i=> total+=plants[i].storage);
+    let avg=total/connections.length;
 
-    connections.forEach(i=>{
-        plants[i].storage = avg;
-    });
+    connections.forEach(i=> plants[i].storage=avg);
 }
 
 function toggleConnection(i){
     if(gameOver) return;
 
     if(connections.includes(i)){
-        connections = connections.filter(x=>x!==i);
-    }else{
+        connections=connections.filter(x=>x!==i);
+    } else {
         connections.push(i);
     }
-
     equalize();
 }
 
@@ -172,18 +325,16 @@ function gameLoop(){
     if(gameOver) return;
 
     plants.forEach((p,i)=>{
-        p.storage -= FIXED_DEMAND[i] * 0.5;
-        if(p.storage <= 0){
-            gameOver = true;
+        p.storage -= FIXED_DEMAND[i]*0.5;
+        if(p.storage<=0){
+            gameOver=true;
             alert("Game Over! Survived "+time+" seconds");
         }
     });
 
     equalize();
     updateUI();
-
     time++;
-    document.getElementById("timer").innerText="Time Survived: "+time+"s";
 }
 
 setInterval(gameLoop,1000);
