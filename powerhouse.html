@@ -1,346 +1,211 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>⚡ Powerhouse Survival</title>
-
+<title>Powerhouse Grid Game</title>
 <style>
-body{
-    margin:0;
-    background:linear-gradient(to bottom, #0f172a, #1e293b);
-    font-family:'Segoe UI', sans-serif;
-    color:white;
-    text-align:center;
+body {
+    margin: 0;
+    font-family: 'Segoe UI', sans-serif;
+    background: #1c1f2a;
+    color: white;
+    text-align: center;
 }
-
-h1{
-    margin-top:20px;
-    font-weight:600;
+h1 {
+    margin: 20px 0;
 }
-
-#timer{
-    font-size:18px;
-    margin:15px 0;
-    padding:8px 18px;
-    background:rgba(255,255,255,0.08);
-    border-radius:20px;
-    display:inline-block;
+#game-container {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr); /* 3 columns */
+    grid-template-rows: repeat(2, auto);   /* 2 rows */
+    gap: 20px;
+    padding: 30px;
+    justify-items: center;
 }
-
-.game{
-    display:grid;
-    grid-template-columns:repeat(auto-fit,minmax(230px,1fr));
-    gap:30px;
-    padding:40px;
+.building {
+    background: rgba(255,255,255,0.05);
+    padding: 15px;
+    border-radius: 12px;
+    width: 150px;
+    position: relative;
+    cursor: pointer;
+    transition: transform 0.3s;
 }
-
-.plant{
-    background:rgba(255,255,255,0.05);
-    padding:25px;
-    border-radius:20px;
-    backdrop-filter:blur(10px);
-    box-shadow:0 10px 25px rgba(0,0,0,0.4);
-    position:relative;
-    transition:0.3s;
+.building:hover {
+    transform: translateY(-5px);
 }
-
-.plant:hover{
-    transform:translateY(-5px);
+.building h3 {
+    margin: 10px 0;
+    font-size: 16px;
 }
-
-/* HOUSE */
-.house-wrapper{
-    position:relative;
-    width:120px;
-    margin:0 auto 15px auto;
+.bar-label {
+    font-size: 12px;
+    text-align: left;
+    margin-top: 8px;
+    opacity: 0.8;
 }
-
-.roof{
-    width:0;
-    height:0;
-    border-left:70px solid transparent;
-    border-right:70px solid transparent;
-    border-bottom:60px solid #b91c1c;
-    margin:0 auto;
-    position:relative;
+.bar-container {
+    height: 12px;
+    width: 100%;
+    background: #334155;
+    border-radius: 10px;
+    overflow: hidden;
+    margin-top: 4px;
 }
-
-.chimney{
-    width:20px;
-    height:40px;
-    background:#444;
-    position:absolute;
-    top:-40px;
-    right:25px;
-    border-radius:3px;
+.storage-level {
+    height: 100%;
+    background: #22c55e;
+    width: 100%;
+    transition: width 0.4s;
 }
-
-.house{
-    width:120px;
-    height:90px;
-    background:linear-gradient(to bottom,#3b82f6,#1e40af);
-    border-radius:8px;
-    position:relative;
+.demand-level {
+    height: 100%;
+    background: #f97316;
+    width: 60%;
+    transition: width 0.4s;
 }
-
-.door{
-    width:30px;
-    height:45px;
-    background:#78350f;
-    position:absolute;
-    bottom:0;
-    left:45px;
-    border-radius:5px 5px 0 0;
+.warning {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    background: #facc15;
+    color: black;
+    padding: 3px 6px;
+    border-radius: 10px;
+    font-size: 11px;
+    display: none;
 }
-
-.window{
-    width:25px;
-    height:25px;
-    background:#facc15;
-    position:absolute;
-    top:25px;
-    border-radius:4px;
-    box-shadow:0 0 10px rgba(255,255,150,0.7);
+.smoke {
+    width: 10px;
+    height: 10px;
+    background: rgba(200,200,200,0.7);
+    border-radius: 50%;
+    position: absolute;
+    top: -20px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: none;
 }
-
-.window.left{ left:15px; }
-.window.right{ right:15px; }
-
-/* Smoke */
-.smoke{
-    width:15px;
-    height:15px;
-    background:rgba(220,220,220,0.7);
-    border-radius:50%;
-    position:absolute;
-    top:-60px;
-    right:30px;
-    animation:smokeRise 3s linear infinite;
-    display:none;
-}
-
-@keyframes smokeRise{
-    0%{transform:translateY(0) scale(1);opacity:0.8;}
-    100%{transform:translateY(-50px) scale(1.5);opacity:0;}
-}
-
-/* Warning */
-.warning{
-    position:absolute;
-    top:15px;
-    right:15px;
-    background:#facc15;
-    color:black;
-    padding:5px 8px;
-    border-radius:15px;
-    font-size:12px;
-    font-weight:bold;
-    display:none;
-    animation:pulse 1s infinite;
-}
-
-@keyframes pulse{
-    0%{transform:scale(1);}
-    50%{transform:scale(1.1);}
-    100%{transform:scale(1);}
-}
-
-/* Bars */
-.bar-label{
-    font-size:12px;
-    margin-top:10px;
-    text-align:left;
-    opacity:0.8;
-}
-
-.storage-bar,
-.demand-bar{
-    height:12px;
-    border-radius:20px;
-    overflow:hidden;
-    margin-top:6px;
-    background:#334155;
-}
-
-.storage-level{
-    height:100%;
-    background:linear-gradient(to right,#22c55e,#06b6d4);
-    transition:width 0.4s ease;
-}
-
-.demand-level{
-    height:100%;
-    background:linear-gradient(to right,#f97316,#ef4444);
-    transition:width 0.4s ease;
-}
-
-button{
-    margin-top:15px;
-    padding:8px 14px;
-    border:none;
-    border-radius:8px;
-    cursor:pointer;
-    background:linear-gradient(to right,#3b82f6,#06b6d4);
-    color:white;
-    transition:0.3s;
-}
-
-button:hover{
-    transform:scale(1.05);
-}
-
-/* Dead state */
-.dead .house{
-    background:linear-gradient(to bottom,#7f1d1d,#450a0a);
-}
-
-.dead .window{
-    background:#111;
-    box-shadow:none;
+.selected {
+    box-shadow: 0 0 15px 3px #facc15;
 }
 </style>
 </head>
-
 <body>
 
-<h1>⚡ Powerhouse Survival ⚡</h1>
-<div id="timer">Time Survived: 0s</div>
-<div class="game" id="game"></div>
+<h1>⚡ Powerhouse Grid Game ⚡</h1>
+
+<div id="game-container"></div>
 
 <script>
+// ===== BUILDING DATA =====
+const BUILDINGS = [
+    {name:"Power Plant", storage:100, demand:1.5},
+    {name:"Industry", storage:100, demand:1.3},
+    {name:"House", storage:100, demand:1.0},
+    {name:"School", storage:100, demand:0.9},
+    {name:"Hospital", storage:100, demand:1.2},
+    {name:"Mall", storage:100, demand:1.1},
+];
 
-const NUM_PLANTS = 6;
-const FIXED_DEMAND = [1.2, 1.0, 1.5, 0.9, 1.3, 1.1];
-const MAX_DEMAND = 2;
+const MAX_DEMAND = 3;
+const TRANSFER_PERCENTAGE = 0.3; // 30% of first building's storage
 
-let plants = [];
-let connections = [];
-let time = 0;
-let gameOver = false;
+let buildings = [];
+let selectedBuilding = null;
 
-const gameDiv = document.getElementById("game");
+const container = document.getElementById("game-container");
 
-for(let i=0;i<NUM_PLANTS;i++){
+// ===== CREATE BUILDINGS =====
+BUILDINGS.forEach((b, i) => {
+    let building = {
+        id: i,
+        name: b.name,
+        storage: b.storage,
+        demand: b.demand,
+        element: null,
+        demandInput: null
+    };
 
-    let plant = { id:i, storage:100, element:null };
-
-    let div = document.createElement("div");
-    div.className="plant";
-
-    div.innerHTML=`
-        <h3>Zone ${i+1}</h3>
-
-        <div class="house-wrapper">
-            <div class="roof">
-                <div class="chimney"></div>
-            </div>
-            <div class="house">
-                <div class="door"></div>
-                <div class="window left"></div>
-                <div class="window right"></div>
-            </div>
-            <div class="smoke" id="smoke${i}"></div>
-        </div>
-
-        <div class="warning" id="warning${i}">LOW FUEL</div>
-
+    const div = document.createElement("div");
+    div.className = "building";
+    div.innerHTML = `
+        <h3>${b.name}</h3>
+        <div class="smoke"></div>
+        <div class="warning">LOW FUEL</div>
         <div class="bar-label">Storage</div>
-        <div class="storage-bar">
-            <div class="storage-level" id="storage${i}"></div>
-        </div>
-
+        <div class="bar-container"><div class="storage-level"></div></div>
         <div class="bar-label">Demand</div>
-        <div class="demand-bar">
-            <div class="demand-level" id="demand${i}"></div>
-        </div>
-
-        <button onclick="toggleConnection(${i})">
-            Toggle Connect
-        </button>
+        <div class="bar-container"><div class="demand-level"></div></div>
+        <input type="range" min="0" max="${MAX_DEMAND}" step="0.1" value="${b.demand}" style="width:100%; margin-top:5px;">
     `;
+    container.appendChild(div);
 
-    plant.element = div;
-    plants.push(plant);
-    gameDiv.appendChild(div);
-}
-
-function updateUI(){
-
-    plants.forEach((p,i)=>{
-
-        let storagePercent = Math.max(p.storage,0);
-        document.getElementById("storage"+i).style.width = storagePercent+"%";
-
-        let demandPercent = (FIXED_DEMAND[i]/MAX_DEMAND)*100;
-        document.getElementById("demand"+i).style.width = demandPercent+"%";
-
-        let smoke = document.getElementById("smoke"+i);
-        let warning = document.getElementById("warning"+i);
-        let storageBar = document.getElementById("storage"+i);
-
-        if(p.storage < 30){
-            warning.style.display="block";
-            smoke.style.display="block";
-        } else {
-            warning.style.display="none";
-            smoke.style.display="none";
-        }
-
-        if(storagePercent < demandPercent){
-            storageBar.style.background="linear-gradient(to right,#ef4444,#dc2626)";
-        } else {
-            storageBar.style.background="linear-gradient(to right,#22c55e,#06b6d4)";
-        }
-
-        if(p.storage <= 0){
-            p.element.classList.add("dead");
-        }
+    const demandInput = div.querySelector("input");
+    demandInput.addEventListener("input", e => {
+        building.demand = parseFloat(e.target.value);
     });
 
-    document.getElementById("timer").innerText="Time Survived: "+time+"s";
-}
+    div.addEventListener("click", () => selectBuilding(building));
 
-function equalize(){
-    if(connections.length<2) return;
+    building.element = div;
+    building.demandInput = demandInput;
 
-    let total=0;
-    connections.forEach(i=> total+=plants[i].storage);
-    let avg=total/connections.length;
+    buildings.push(building);
+});
 
-    connections.forEach(i=> plants[i].storage=avg);
-}
-
-function toggleConnection(i){
-    if(gameOver) return;
-
-    if(connections.includes(i)){
-        connections=connections.filter(x=>x!==i);
+// ===== SELECT AND TRANSFER POWER =====
+function selectBuilding(building){
+    if(selectedBuilding === null){
+        selectedBuilding = building;
+        building.element.classList.add("selected");
+    } else if(selectedBuilding === building){
+        selectedBuilding.element.classList.remove("selected");
+        selectedBuilding = null;
     } else {
-        connections.push(i);
+        // Transfer power from first to second building
+        let transferAmount = selectedBuilding.storage * TRANSFER_PERCENTAGE;
+        selectedBuilding.storage -= transferAmount;
+        building.storage += transferAmount;
+        selectedBuilding.element.classList.remove("selected");
+        selectedBuilding = null;
+        updateUI();
     }
-    equalize();
 }
 
-function gameLoop(){
-    if(gameOver) return;
+// ===== UPDATE UI =====
+function updateUI(){
+    buildings.forEach(b => {
+        const storageBar = b.element.querySelector(".storage-level");
+        storageBar.style.width = Math.max(b.storage,0) + "%";
 
-    plants.forEach((p,i)=>{
-        p.storage -= FIXED_DEMAND[i]*0.5;
-        if(p.storage<=0){
-            gameOver=true;
-            alert("Game Over! Survived "+time+" seconds");
+        const demandBar = b.element.querySelector(".demand-level");
+        demandBar.style.width = (b.demand/MAX_DEMAND*100) + "%";
+
+        const warning = b.element.querySelector(".warning");
+        const smoke = b.element.querySelector(".smoke");
+
+        if(b.storage < 30){
+            warning.style.display = "block";
+            smoke.style.display = "block";
+        } else {
+            warning.style.display = "none";
+            smoke.style.display = "none";
         }
     });
-
-    equalize();
-    updateUI();
-    time++;
 }
 
-setInterval(gameLoop,1000);
+// ===== GAME LOOP =====
+setInterval(() => {
+    buildings.forEach(b => {
+        b.storage -= b.demand * 0.5; // decrease storage according to demand
+        if(b.storage < 0) b.storage = 0;
+    });
+    updateUI();
+}, 1000);
+
 updateUI();
 
 </script>
-
 </body>
 </html>
